@@ -92,9 +92,9 @@ public class SolrCloudClientFactory implements SolrClientFactory {
   @VisibleForTesting
   SolrClient createSolrCloudClient(String zookeeperHosts, String collection) {
     try {
+      LOGGER.trace("Entering createSolrCloudClient");
       CloudSolrClient client = newCloudSolrClient(zookeeperHosts);
       client.setDefaultCollection(collection);
-
       Failsafe.with(
               ABORT_WHEN_INTERRUPTED_AND_RETRY_UNTIL_NO_ERROR_AND_A_COLLECTION_IS_CREATED
                   .onRetry(
@@ -120,9 +120,18 @@ public class SolrCloudClientFactory implements SolrClientFactory {
 
   private boolean createCollectionIfMissing(String collection, CloudSolrClient client)
       throws SolrServerException, IOException, SolrFactoryException {
-    client.connect();
+    LOGGER.trace("Entering createCollectionIfMissing");
+
+    try {
+      client.connect();
+    } catch (Exception e) {
+      LOGGER.error("Couldn't connect to solr client: ", e);
+      throw new SolrServerException("Couldn't connect to solr client: ", e);
+    }
+    LOGGER.trace("Successfully connected to client");
 
     if (!isAliasCollection(collection, client)) {
+      LOGGER.trace("Determined collection is not an alias");
       uploadCoreConfiguration(collection, client);
       createCollection(collection, client);
       return collectionExists(collection, client);
@@ -142,6 +151,7 @@ public class SolrCloudClientFactory implements SolrClientFactory {
   public boolean createCollection(String collection, CloudSolrClient client)
       throws SolrFactoryException {
     try {
+      LOGGER.trace("Entering createCollection");
       if (isAliasCollection(collection, client)) {
         LOGGER.debug(
             "Solr({}): Collection exists as an Alias, will not create collection", collection);
@@ -149,6 +159,7 @@ public class SolrCloudClientFactory implements SolrClientFactory {
       }
 
       if (!collectionExists(collection, client)) {
+        LOGGER.trace("Collection does not exist yet");
         CollectionConfig config = new CollectionConfig(collection);
         CollectionAdminResponse response =
             CollectionAdminRequest.createCollection(
@@ -175,6 +186,7 @@ public class SolrCloudClientFactory implements SolrClientFactory {
 
   private boolean isAliasCollection(String collection, CloudSolrClient client)
       throws IOException, SolrServerException {
+    LOGGER.trace("Entering isAliasCollection");
     CollectionAdminResponse aliasResponse =
         new CollectionAdminRequest.ListAliases().process(client);
     if (aliasResponse != null) {
