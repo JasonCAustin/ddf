@@ -14,13 +14,18 @@
 package org.codice.ddf.security.logout.endpoint;
 
 import ddf.security.service.SecurityServiceException;
-import java.io.IOException;
-import javax.servlet.http.HttpServlet;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import org.codice.ddf.security.logout.service.LogoutService;
 
-public class LogoutEndpoint extends HttpServlet {
+@Path("/")
+public class LogoutEndpoint {
 
   private LogoutService logoutService;
 
@@ -28,16 +33,17 @@ public class LogoutEndpoint extends HttpServlet {
     this.logoutService = logoutService;
   }
 
-  @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse res) {
-    try {
+  @GET
+  @Path("/actions")
+  public Response getActionProviders(
+      @Context HttpServletRequest request, @Context HttpServletResponse response)
+      throws SecurityServiceException {
 
-      String jsonString = logoutService.getActionProviders(req, res);
-      res.setHeader("Cache-Control", "no-cache, no-store");
-      res.setHeader("Pragma", "no-cache");
-      res.getWriter().print(jsonString);
-    } catch (SecurityServiceException | IOException e) {
-      throw new RuntimeException(e);
-    }
+    String jsonString = logoutService.getActionProviders(request, response);
+
+    return Response.ok(new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8)))
+        .header("Cache-Control", "no-cache, no-store")
+        .header("Pragma", "no-cache")
+        .build();
   }
 }

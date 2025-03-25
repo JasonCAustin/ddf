@@ -23,12 +23,10 @@
         <argument ref="logoutService"/>
     </bean>
 
-    <service ref="logoutServiceEndpoint" interface="javax.servlet.Servlet">
-        <service-properties>
-            <entry key="osgi.http.whiteboard.servlet.pattern" value="/actions/*"/>
-            <entry key="osgi.http.whiteboard.servlet.name" value="logoutServiceServlet"/>
-            <entry key="osgi.http.whiteboard.context.select" value="(osgi.http.whiteboard.context.name=servicesLogoutContextHelper)"/>
-        </service-properties>
-    </service>
+    <jaxrs:server id="restService" address="/logout">
+        <jaxrs:serviceBeans>
+            <ref component-id="logoutServiceEndpoint"/>
+        </jaxrs:serviceBeans>
+    </jaxrs:server>
 
 </blueprint>

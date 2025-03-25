@@ -24,9 +24,8 @@ import static org.codice.ddf.test.common.options.PortOptions.defaultPortsOptions
 import static org.codice.ddf.test.common.options.TestResourcesOptions.getTestResource;
 import static org.codice.ddf.test.common.options.TestResourcesOptions.includeTestResources;
 import static org.codice.ddf.test.common.options.VmOptions.defaultVmOptions;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.osgi.framework.Constants.SERVICE_PID;
@@ -143,10 +142,11 @@ public class ITSynchronizedInstaller {
         syncInstaller.createManagedFactoryService(
             ExampleMSFInstance.FACTORY_PID, props, getExampleBundleLocation());
 
-    assertEquals(1, getServices(ExampleMSFInstance.class).size());
-    assertEquals(createdConfig.getPid(),
-        getServiceReference(ExampleMSFInstance.class).getProperty(SERVICE_PID));
-    assertEquals("testValue", getService(ExampleMSFInstance.class).getExampleProp());
+    assertThat(getServices(ExampleMSFInstance.class).size(), is(1));
+    assertThat(
+        getServiceReference(ExampleMSFInstance.class).getProperty(SERVICE_PID),
+        is(createdConfig.getPid()));
+    assertThat(getService(ExampleMSFInstance.class).getExampleProp(), is("testValue"));
   }
 
   @Test
@@ -155,11 +155,13 @@ public class ITSynchronizedInstaller {
         syncInstaller.createManagedFactoryService(
             ExampleMSFInstance.FACTORY_PID, new HashMap<>(), getExampleBundleLocation());
 
-    assertEquals(1, getServices(ExampleMSFInstance.class).size());
-    assertEquals(createdConfig.getPid(),
-        getServiceReference(ExampleMSFInstance.class).getProperty(SERVICE_PID));
-    assertEquals(ExampleMSFInstance.DEFAULT_EXAMPLE_PROP_VALUE,
-        getService(ExampleMSFInstance.class).getExampleProp());
+    assertThat(getServices(ExampleMSFInstance.class).size(), is(1));
+    assertThat(
+        getServiceReference(ExampleMSFInstance.class).getProperty(SERVICE_PID),
+        is(createdConfig.getPid()));
+    assertThat(
+        getService(ExampleMSFInstance.class).getExampleProp(),
+        is(ExampleMSFInstance.DEFAULT_EXAMPLE_PROP_VALUE));
   }
 
   @Test
@@ -167,11 +169,12 @@ public class ITSynchronizedInstaller {
     Map<String, Object> newProps = new HashMap<>();
     newProps.put(ExampleService.EXAMPLE_PROP_NAME, "testValue");
     syncInstaller.updateManagedService(ExampleService.PID, newProps, getExampleBundleLocation());
-    assertEquals("testValue",
+    assertThat(
         configAdmin
             .getConfiguration(ExampleService.PID)
             .getProperties()
-            .get(ExampleService.EXAMPLE_PROP_NAME));
+            .get(ExampleService.EXAMPLE_PROP_NAME),
+        is("testValue"));
   }
 
   @Test
@@ -180,25 +183,29 @@ public class ITSynchronizedInstaller {
         syncInstaller.createManagedFactoryService(
             ExampleMSFInstance.FACTORY_PID, new Hashtable<>(), getExampleBundleLocation());
 
-    assertEquals(1, getServices(ExampleMSFInstance.class).size());
-    assertEquals(createdConfig.getPid(),
-        getServiceReference(ExampleMSFInstance.class).getProperty(SERVICE_PID));
-    assertEquals(ExampleMSFInstance.DEFAULT_EXAMPLE_PROP_VALUE,
-        getService(ExampleMSFInstance.class).getExampleProp());
+    assertThat(getServices(ExampleMSFInstance.class).size(), is(1));
+    assertThat(
+        getServiceReference(ExampleMSFInstance.class).getProperty(SERVICE_PID),
+        is(createdConfig.getPid()));
+    assertThat(
+        getService(ExampleMSFInstance.class).getExampleProp(),
+        is(ExampleMSFInstance.DEFAULT_EXAMPLE_PROP_VALUE));
 
     Map<String, Object> newProps = new HashMap<>();
     newProps.put(ExampleMSFInstance.EXAMPLE_PROP_NAME, "testValue");
     syncInstaller.updateManagedService(
         createdConfig.getPid(), newProps, getExampleBundleLocation());
 
-    assertEquals(1, getServices(ExampleMSFInstance.class).size());
-    assertEquals(createdConfig.getPid(),
-        getServiceReference(ExampleMSFInstance.class).getProperty(SERVICE_PID));
-    assertEquals("testValue",
+    assertThat(getServices(ExampleMSFInstance.class).size(), is(1));
+    assertThat(
+        getServiceReference(ExampleMSFInstance.class).getProperty(SERVICE_PID),
+        is(createdConfig.getPid()));
+    assertThat(
         configAdmin
             .getConfiguration(createdConfig.getPid())
             .getProperties()
-            .get(ExampleMSFInstance.EXAMPLE_PROP_NAME));
+            .get(ExampleMSFInstance.EXAMPLE_PROP_NAME),
+        is("testValue"));
   }
 
   @Test
@@ -229,13 +236,13 @@ public class ITSynchronizedInstaller {
   public void installFeatures() throws Exception {
     featuresService.uninstallFeature(EXAMPLE_FEATURE);
     syncInstaller.installFeatures(EXAMPLE_FEATURE);
-    assertTrue(featuresService.isInstalled(featuresService.getFeature(EXAMPLE_FEATURE)));
+    assertThat(featuresService.isInstalled(featuresService.getFeature(EXAMPLE_FEATURE)), is(true));
   }
 
   @Test
   public void uninstallFeatures() throws Exception {
     syncInstaller.uninstallFeatures(EXAMPLE_FEATURE);
-    assertFalse(featuresService.isInstalled(featuresService.getFeature(EXAMPLE_FEATURE)));
+    assertThat(!featuresService.isInstalled(featuresService.getFeature(EXAMPLE_FEATURE)), is(true));
   }
 
   @Test
@@ -259,14 +266,14 @@ public class ITSynchronizedInstaller {
   @Test
   public void stopBundles() throws SynchronizedInstallerException {
     syncInstaller.stopBundles(EXAMPLE_BUNDLE_SYM_NAME);
-    assertEquals(Bundle.RESOLVED, testBundle.getState());
+    assertThat(testBundle.getState(), is(Bundle.RESOLVED));
   }
 
   @Test
   public void startBundles() throws Exception {
     testBundle.stop();
     syncInstaller.startBundles(EXAMPLE_BUNDLE_SYM_NAME);
-    assertEquals(Bundle.ACTIVE, testBundle.getState());
+    assertThat(testBundle.getState(), is(Bundle.ACTIVE));
   }
 
   @Test

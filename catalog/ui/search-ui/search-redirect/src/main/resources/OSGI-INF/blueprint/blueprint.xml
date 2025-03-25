@@ -21,9 +21,8 @@
 
     <service ref="redirectServlet" interface="javax.servlet.Servlet">
         <service-properties>
-            <entry key="osgi.http.whiteboard.servlet.pattern" value="/search"/>
-            <entry key="osgi.http.whiteboard.servlet.name" value="search-redirect"/>
-            <entry key="osgi.http.whiteboard.servlet.asyncSupported" value="true"/>
+            <entry key="alias" value="/search"/>
+            <entry key="async-supported" value="true"/>
         </service-properties>
     </service>
 
