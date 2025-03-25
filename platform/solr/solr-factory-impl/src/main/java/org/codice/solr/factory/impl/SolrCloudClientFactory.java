@@ -92,9 +92,11 @@ public class SolrCloudClientFactory implements SolrClientFactory {
   @VisibleForTesting
   SolrClient createSolrCloudClient(String zookeeperHosts, String collection) {
     try {
+      LOGGER.error("alexa - enter createSolrCloudClient");
       CloudSolrClient client = newCloudSolrClient(zookeeperHosts);
+      LOGGER.error("alexa - client created");
       client.setDefaultCollection(collection);
-
+      LOGGER.error("alexa - set defult collection");
       Failsafe.with(
               ABORT_WHEN_INTERRUPTED_AND_RETRY_UNTIL_NO_ERROR_AND_A_COLLECTION_IS_CREATED
                   .onRetry(
@@ -109,7 +111,7 @@ public class SolrCloudClientFactory implements SolrClientFactory {
           .onFailure(
               e -> LOGGER.error("Solr client ({}) creation failed", collection, e.getException()))
           .onSuccess(e -> LOGGER.info("Solr client ({}) creation was successful", collection))
-          .runAsync(() -> createCollectionIfMissing(collection, client));
+          .run(() -> createCollectionIfMissing(collection, client));
 
       return client;
     } catch (LinkageError | Exception e) {
@@ -120,10 +122,19 @@ public class SolrCloudClientFactory implements SolrClientFactory {
 
   private boolean createCollectionIfMissing(String collection, CloudSolrClient client)
       throws SolrServerException, IOException, SolrFactoryException {
-    client.connect();
+    LOGGER.error("alexa - enter createCollectionIfMissing");
 
+    try {
+      client.connect();
+    } catch (Exception e) {
+      LOGGER.error("alexa - couldn't connect to client: {}", e);
+    }
+
+    LOGGER.error("alexa - connected to client");
     if (!isAliasCollection(collection, client)) {
+      LOGGER.error("alexa - uploading core");
       uploadCoreConfiguration(collection, client);
+      LOGGER.error("alexa - create collection");
       createCollection(collection, client);
       return collectionExists(collection, client);
     } else {
@@ -142,6 +153,7 @@ public class SolrCloudClientFactory implements SolrClientFactory {
   public boolean createCollection(String collection, CloudSolrClient client)
       throws SolrFactoryException {
     try {
+      LOGGER.error("alexa - entering createCollection");
       if (isAliasCollection(collection, client)) {
         LOGGER.debug(
             "Solr({}): Collection exists as an Alias, will not create collection", collection);
@@ -149,6 +161,7 @@ public class SolrCloudClientFactory implements SolrClientFactory {
       }
 
       if (!collectionExists(collection, client)) {
+        LOGGER.error("alexa - collection does not exist");
         CollectionConfig config = new CollectionConfig(collection);
         CollectionAdminResponse response =
             CollectionAdminRequest.createCollection(
@@ -163,6 +176,7 @@ public class SolrCloudClientFactory implements SolrClientFactory {
               "Solr collection [" + collection + "] was not ready in time.");
         }
       } else {
+        LOGGER.error("alexa - Collection already exists");
         LOGGER.debug("Solr({}): Collection already exists", collection);
         return false;
       }
@@ -175,16 +189,19 @@ public class SolrCloudClientFactory implements SolrClientFactory {
 
   private boolean isAliasCollection(String collection, CloudSolrClient client)
       throws IOException, SolrServerException {
+    LOGGER.error("alexa - list aliases");
     CollectionAdminResponse aliasResponse =
         new CollectionAdminRequest.ListAliases().process(client);
     if (aliasResponse != null) {
       Map<String, String> aliases = aliasResponse.getAliases();
       if (aliases != null && aliases.containsKey(collection)) {
+        LOGGER.error("alexa - is alias");
         LOGGER.debug(
             "Solr({}): Collection exists as an Alias, will not create collection", collection);
         return true;
       }
     }
+    LOGGER.error("alexa - is not alias");
     return false;
   }
 
