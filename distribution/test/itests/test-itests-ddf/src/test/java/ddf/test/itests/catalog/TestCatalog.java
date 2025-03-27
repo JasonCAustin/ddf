@@ -484,8 +484,6 @@ public class TestCatalog extends AbstractIntegrationTest {
     String uuid = UUID.randomUUID().toString().replaceAll("-", "");
 
     return given()
-        .log()
-        .all()
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML)
         .body(
             getCswInsertRequest(
@@ -497,8 +495,6 @@ public class TestCatalog extends AbstractIntegrationTest {
 
   private Response ingestXmlViaCsw() {
     return given()
-        .log()
-        .all()
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML)
         .body(
             getCswInsertRequest(
