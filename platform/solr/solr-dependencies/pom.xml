@@ -36,24 +36,13 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.apache.solr</groupId>
-            <artifactId>solr-solrj-zookeeper</artifactId>
-            <version>${solr.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>jcl-over-slf4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty.http2</groupId>
             <artifactId>http2-client</artifactId>
-            <version>${solr.jetty.version}</version>
+            <version>${jetty.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -120,9 +109,7 @@
                         </Export-Package>
                         <Embed-Dependency>
                             solr-solrj,
-                            solr-solrj-zookeeper,
                             commons-io,
-                            http2-client,
                             httpmime,
                             zookeeper,
                             zookeeper-jute
@@ -183,10 +170,8 @@
                             org.eclipse.jetty.http;resolution:=optional,
                             org.eclipse.jetty.http2.client;resolution:=optional,
                             org.eclipse.jetty.http2.client.http;resolution:=optional,
-                            org.eclipse.jetty.io;resolution:=optional,
-                            org.eclipse.jetty.io.*;resolution:=optional,
                             org.eclipse.jetty.util;resolution:=optional,
-                            org.eclipse.jetty.util.*;resolution:=optional,
+                            org.eclipse.jetty.util.ssl;resolution:=optional,
 
                             <!--
                                 There are ddf dependencies using both this solr-dependencies and httpclient/httpcore.

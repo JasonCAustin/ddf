@@ -250,7 +250,7 @@ public class BackupCommandTest extends SolrCommandTest {
             String.format(
                 "Backing up collection [%s] to shared location [%s] using backup name [%s_",
                 DEFAULT_CORE_NAME, backupCommand.backupLocation, DEFAULT_CORE_NAME)));
-    assertThat(consoleOutput.getOutput(), containsString("Solr Cloud backup request Id ["));
+    assertThat(consoleOutput.getOutput(), containsString("Solr Cloud backup request Id:"));
   }
 
   @Test
@@ -564,25 +564,21 @@ public class BackupCommandTest extends SolrCommandTest {
   // Replace ASCII color codes in console output and get the request Id
   private String getRequestId(String consoleOutput) {
     return StringUtils.trim(
-        StringUtils.substringsBetween(
-            ASCII_COLOR_CODES_REGEX.matcher(consoleOutput).replaceAll(""),
-            "Solr Cloud backup request Id [",
-            "]")[0]);
+        StringUtils.substringAfterLast(
+            ASCII_COLOR_CODES_REGEX.matcher(consoleOutput).replaceAll(""), ":"));
   }
 
   // Replace ASCII color codes in console output and get the status
   private String getRequestStatus(String consoleOutput) {
     return StringUtils.trim(
         StringUtils.substringsBetween(
-            ASCII_COLOR_CODES_REGEX.matcher(consoleOutput).replaceAll(""), "] is [", "]")[0]);
+            ASCII_COLOR_CODES_REGEX.matcher(consoleOutput).replaceAll(""), "[", "]")[1]);
   }
 
   private String getBackupName(String consoleOutput) {
     return StringUtils.trim(
         StringUtils.substringsBetween(
-            ASCII_COLOR_CODES_REGEX.matcher(consoleOutput).replaceAll(""),
-            "using backup name [",
-            "]")[0]);
+            ASCII_COLOR_CODES_REGEX.matcher(consoleOutput).replaceAll(""), "[", "]")[2]);
   }
 
   private String waitForCompletedStatusOrFail(
